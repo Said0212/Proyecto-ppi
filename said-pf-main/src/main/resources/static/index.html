@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Form</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="mb-4">Almacenes El INGE</h1>
+    <form id="productForm">
+        <div class="mb-3">
+            <label for="productName" class="form-label">Product Name</label>
+            <input type="text" class="form-control" id="productName" name="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="productPrice" class="form-label">Price</label>
+            <input type="number" class="form-control" id="productPrice" name="price" step="0.01" required>
+        </div>
+        <div class="mb-3">
+            <label for="productQuantity" class="form-label">Quantity</label>
+            <input type="number" class="form-control" id="productQuantity" name="quantity" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <div class="mt-5">
+        <h2 class="mb-3">Search Product by ID</h2>
+        <div class="mb-3">
+            <label for="searchProductId" class="form-label">Product ID</label>
+            <input type="text" class="form-control" id="searchProductId">
+        </div>
+        <button type="button" class="btn btn-primary" onclick="searchProduct()">Search</button>
+        <div id="searchResult" class="mt-3"></div>
+    </div>
+</div>
+
+
+<!-- Bootstrap JS (optional, if needed for any functionality) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<!-- Axios (optional, if using AJAX for form submission) -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    document.getElementById('productForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        submitProductForm();
+    });
+
+    function submitProductForm() {
+        const formData = new FormData(document.getElementById('productForm'));
+        const product = {
+            name: formData.get('name'),
+            price: parseFloat(formData.get('price')),
+            quantity: parseInt(formData.get('quantity'))
+        };
+
+        // Send the product data to your backend API using AJAX (you might need to adjust this part based on your backend setup)
+        axios.post('/api/products', product)
+            .then(response => {
+                console.log(response.data); // You can handle the response here
+                alert('Product added successfully!');
+                document.getElementById('productForm').reset(); // Reset the form after successful submission
+            })
+            .catch(error => {
+                console.error(error); // Handle any errors here
+                alert('An error occurred while adding the product. Please try again.');
+            });
+    }
+
+    function searchProduct() {
+        const productId = document.getElementById('searchProductId').value;
+
+        // Send the product ID to your backend API to fetch the product details
+        axios.get(`/api/products/${productId}`)
+            .then(response => {
+                const product = response.data;
+                displaySearchResult(product);
+            })
+            .catch(error => {
+                console.error(error); // Handle any errors here
+                document.getElementById('searchResult').innerHTML = 'Product not found';
+            });
+    }
+
+    function displaySearchResult(product) {
+        const searchResultDiv = document.getElementById('searchResult');
+        if (product) {
+            searchResultDiv.innerHTML = `
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Product Details</h4>
+                    <p class="card-text"><strong>ID:</strong> ${product.id}</p>
+                    <p class="card-text"><strong>Name:</strong> ${product.name}</p>
+                    <p class="card-text"><strong>Price:</strong> $${product.price.toFixed(2)}</p>
+                    <p class="card-text"><strong>Quantity:</strong> ${product.quantity}</p>
+                </div>
+            </div>
+        `;
+        } else {
+            searchResultDiv.innerHTML = '<div class="alert alert-warning" role="alert">Product not found</div>';
+        }
+    }
+
+
+</script>
+</body>
+</html>
